@@ -36,7 +36,8 @@ namespace Websockets.IosTests
             //Do test
 
             Console.WriteLine("Connecting...");
-            connection.Open("http://echo.websocket.org");
+            connection.AddHttpHeader("Origin", "http://localhost/");
+            connection.Open("ws://echo.websocket.org/");
 
             while (!connection.IsOpen && !Failed)
             {

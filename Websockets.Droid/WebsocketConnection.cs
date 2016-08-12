@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Websockets.DroidBridge;
 
 namespace Websockets.Droid
@@ -19,6 +20,7 @@ namespace Websockets.Droid
         public event Action<string> OnLog = delegate { };
 
         private BridgeController _controller;
+        private Dictionary<string, string> httpheaders = new Dictionary<string, string>();
 
         static WebsocketConnection()
         {
@@ -54,12 +56,21 @@ namespace Websockets.Droid
                 _controller.Proxy = this;
                 _controller.Proxy = this;
                 _controller.Proxy = this;
+
+                foreach (var header in httpheaders)
+                    _controller.SetRequestHeader(header.Key, header.Value);
+
                 _controller.Open(url, protocol);
             }
             catch (Exception ex)
             {
                 OnError(ex.Message);
             }
+        }
+
+        public void AddHttpHeader(string header, string value)
+        {
+            httpheaders.Add(header, value);
         }
 
         protected override void Dispose(bool disposing)

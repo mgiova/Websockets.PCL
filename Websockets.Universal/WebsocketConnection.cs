@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Windows.Foundation;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
@@ -29,6 +30,7 @@ namespace Websockets.Universal
 
         private MessageWebSocket _websocket;
         private DataWriter messageWriter;
+        private Dictionary<string, string> httpheaders = new Dictionary<string, string>();
 
         public void Open(string url, string protocol = null)
         {
@@ -46,6 +48,9 @@ namespace Websockets.Universal
                     url = url.Replace("https://", "wss://");
                 else if (url.StartsWith("http"))
                     url = url.Replace("http://", "ws://");
+
+                foreach (var header in httpheaders)
+                    _websocket.SetRequestHeader(header.Key, header.Value);
 
                 _websocket.ConnectAsync(new Uri(url)).Completed = (source, status) =>
                 {
@@ -69,6 +74,10 @@ namespace Websockets.Universal
             }
         }
 
+        public void AddHttpHeader(string header, string value)
+        {
+            httpheaders.Add(header, value);
+        }
 
         public void Close()
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using SuperSocket.ClientEngine;
 using WebSocket4Net;
 
@@ -27,6 +28,7 @@ namespace Websockets.WP8
         }
 
         protected WebSocket websocket;
+        private List<KeyValuePair<string, string>> httpheaders;
 
         public void Open(string url, string protocol = null)
         {
@@ -37,14 +39,22 @@ namespace Websockets.WP8
             else if (url.StartsWith("http"))
                 url = url.Replace("http://", "ws://");
 
-            websocket = new WebSocket(url, protocol);
+            websocket = new WebSocket(url, protocol, "", httpheaders);
             websocket.Opened += Websocket_Opened;
             websocket.Error += Websocket_Error;
             websocket.Closed += Websocket_Closed;
             websocket.MessageReceived += Websocket_MessageReceived;
             websocket.Open();
         }
-        
+
+        public void AddHttpHeader(string header, string value)
+        {
+            if (httpheaders == null)
+                httpheaders = new List<KeyValuePair<string, string>>();
+
+            httpheaders.Add(new KeyValuePair<string, string>(header, value));
+        }
+
         public void Send(string message)
         {
             websocket.Send(message);

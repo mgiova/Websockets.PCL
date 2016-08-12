@@ -15,27 +15,31 @@ import android.util.Log;
 //https://github.com/koush/AndroidAsync
 import com.koushikdutta.async.callback.CompletedCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
+import com.koushikdutta.async.http.AsyncHttpGet;
 import com.koushikdutta.async.http.WebSocket;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 public class BridgeController {
 
     private WebSocket mConnection;
+    public HashMap<String, List<String>> customHeaders = new HashMap<String, List<String>>();
     private static String TAG = "websockets";
 
     //MUST BE SET
     public BridgeProxy proxy;
     Handler mainHandler;
 
-
     public BridgeController() {
         Log.d(TAG, "ctor");
-        mainHandler   = new Handler(Looper.getMainLooper());
+        mainHandler = new Handler(Looper.getMainLooper());
     }
 
     // connect websocket
@@ -61,8 +65,11 @@ public class BridgeController {
             Log.d("SSLCONFIG", e.toString(), e);
         }
 
+        AsyncHttpGet request = new AsyncHttpGet(wsuri.replace("ws://", "http://").replace("wss://", "https://"));
+        if (request != null)
+            request.getHeaders().addAll(this.customHeaders);
 
-        AsyncHttpClient.getDefaultInstance().websocket(wsuri, protocol, new AsyncHttpClient
+        AsyncHttpClient.getDefaultInstance().websocket(request, protocol, new AsyncHttpClient
                 .WebSocketConnectCallback()
         {
             @Override
@@ -99,8 +106,13 @@ public class BridgeController {
         });
     }
 
-    public void Close() {
+    public void SetRequestHeader(String key, String value) {
+        ArrayList<String> list = new ArrayList<String>();
+        list.add(value);
+        this.customHeaders.put(key, list);
+    }
 
+    public void Close() {
         try
         {
             if(mConnection == null)

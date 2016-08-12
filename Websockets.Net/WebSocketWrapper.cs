@@ -40,6 +40,11 @@ namespace Websockets.Net
             return new WebSocketWrapper();
         }
 
+        public void SetRequestHeader(string header, string value)
+        {
+            _ws.Options.SetRequestHeader(header, value);
+        }
+
         /// <summary>
         /// Connects to the WebSocket server.
         /// </summary>

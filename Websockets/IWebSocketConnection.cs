@@ -14,6 +14,8 @@ namespace Websockets
         void Close();
 
         void Send(string message);
+
+        void AddHttpHeader(string header, string value);
         
         event Action OnOpened;
 

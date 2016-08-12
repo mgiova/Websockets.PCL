@@ -1,7 +1,7 @@
 using System;
 using Foundation;
 using Square.SocketRocket;
-
+using System.Collections.Generic;
 
 namespace Websockets.Ios
 {
@@ -31,6 +31,7 @@ namespace Websockets.Ios
         }
 
         private WebSocket _client = null;
+        private Dictionary<string, string> httpheaders = new Dictionary<string, string>();
 
         public void Open(string url, string protocol = null)
         {
@@ -39,10 +40,14 @@ namespace Websockets.Ios
                 if (_client != null)
                     Close();
 
+                NSMutableUrlRequest request = new NSMutableUrlRequest(new NSUrl(url));
+                foreach (var header in httpheaders)
+                    request[header.Key] = header.Value;
+
                 if (string.IsNullOrEmpty(protocol))
-                    _client = new WebSocket(new NSUrl(url));
+                    _client = new WebSocket(request);
                 else
-                    _client = new WebSocket(new NSUrl(url), new NSObject[] { new NSString(protocol) });
+                    _client = new WebSocket(request, new NSObject[] { new NSString(protocol) });
 
                 _client.ReceivedMessage += _client_ReceivedMessage;
                 _client.WebSocketClosed += _client_WebSocketClosed;
@@ -55,6 +60,11 @@ namespace Websockets.Ios
             {
                 OnError(ex.Message);
             }
+        }
+
+        public void AddHttpHeader(string header, string value)
+        {
+            httpheaders.Add(header, value);
         }
 
         public void Close()

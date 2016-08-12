@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Websockets.Net
 {
@@ -30,6 +31,7 @@ namespace Websockets.Net
         }
 
         private WebSocketWrapper _websocket = null;
+        private Dictionary<string, string> httpheaders = new Dictionary<string, string>();
 
         public async void Open(string url, string protocol = null)
         {
@@ -49,6 +51,9 @@ namespace Websockets.Net
                 else if (url.StartsWith("http"))
                     url = url.Replace("http://", "ws://");
 
+                foreach (var header in httpheaders)
+                    _websocket.SetRequestHeader(header.Key, header.Value);
+
                 await _websocket.Connect(url, protocol);
 
             }
@@ -56,6 +61,11 @@ namespace Websockets.Net
             {
                 OnError(ex.Message);
             }
+        }
+
+        public void AddHttpHeader(string header, string value)
+        {
+            httpheaders.Add(header, value);
         }
 
         public void Close()
